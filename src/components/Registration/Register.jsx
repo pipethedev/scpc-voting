@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import logo from "../../assets/logo.svg";
 import { CircularProgress } from "@chakra-ui/react";
 import { registrationRequest } from "../../http/requests";
 import Redirect from "./Redirect";
@@ -114,7 +113,7 @@ const Register = () => {
   return (
     <section>
       <div>
-        <img src={logo} alt="logo" />
+        <img src={'https://res.cloudinary.com/dzp0iq9mw/image/upload/v1721775211/scpc/449716170_1260964582021173_993437044093772892_n_dreh2f.png'} alt="logo" />
       </div>
       {showRedirectMsg ? (
         <Redirect message={data} />
