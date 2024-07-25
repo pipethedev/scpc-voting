@@ -71,7 +71,7 @@ const Categories = ({ isVoted }) => {
     } else {
       setLoading(false);
       setError("No token found");
-      navigate("/login");
+      navigate("/");
     }
   }, [urlToken, navigate]);
 
