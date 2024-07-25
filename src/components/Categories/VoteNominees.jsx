@@ -84,7 +84,9 @@ const VoteNominees = ({ doneVoting }) => {
 
         const voteResponse = await vote(votingData, token);
         if (voteResponse.responseData.error) {
-          toast.error(voteResponse.responseData.error || "An error occurred while voting");
+          toast.error(
+            voteResponse.responseData.error || "An error occurred while voting",
+          );
         } else {
           setLoading(false);
           toast.success(voteResponse.responseData.message, { duration: 3000 });
@@ -119,14 +121,14 @@ const VoteNominees = ({ doneVoting }) => {
       >
         <div className="nom-img">
           <div
-          className="w-80 h-96"
-        style={{
-          backgroundImage: `url(${value.pictureUrl || nomineePic})`,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-        }}
-      ></div>
+            className="w-80 h-96"
+            style={{
+              backgroundImage: `url(${value.pictureUrl || nomineePic})`,
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+            }}
+          ></div>
         </div>
         <div>
           <p>
@@ -158,7 +160,7 @@ const VoteNominees = ({ doneVoting }) => {
       ) : (
         <div>
           <div className="cat-header cursor-pointer">
-            <Link to='/vote'>VOTING</Link>
+            <Link to="/vote">VOTING</Link>
             <span>{categoryName}</span>
           </div>
           <div className="renderNominees">{renderNominees}</div>
@@ -169,7 +171,7 @@ const VoteNominees = ({ doneVoting }) => {
               disabled={loading}
               class="text-white text-xl bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 p-8"
             >
-              {loading ? 'Voting...' : 'Vote'}
+              {loading ? "Voting..." : "Vote"}
             </button>
 
             <button

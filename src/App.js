@@ -21,7 +21,7 @@ const App = () => {
         <Route path="vote/:token?" element={<Categories isVoted={isVoted} />} />
         <Route
           path="vote/nominees/:id"
-          element={<VoteNominees doneVoting={() => doneVoting()} />}
+          element={<VoteNominees doneVoting={doneVoting} />}
         />
         <Route path="*" element={<ErrorMessage message={"Page not found"} />} />
       </Routes>
@@ -30,12 +30,20 @@ const App = () => {
 };
 
 const ProtectedRegister = () => {
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const token = Cookies.get("voteToken");
     if (token) {
       window.location.href = "/vote";
+    } else {
+      setLoading(false);
     }
   }, []);
+
+  if (loading) {
+    return null;
+  }
 
   return <Register />;
 };

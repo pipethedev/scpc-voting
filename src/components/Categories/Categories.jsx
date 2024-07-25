@@ -6,61 +6,29 @@ import ErrorMessage from "../ErrorMessage";
 import duck from "../../assets/duck.gif";
 import Cookies from "js-cookie";
 import { HoverEffect } from "../Card";
-
-const projects = [
-  {
-    title: "Stripe",
-    description:
-      "A technology company that builds economic infrastructure for the internet.",
-    link: "https://stripe.com",
-  },
-  {
-    title: "Netflix",
-    description:
-      "A streaming service that offers a wide variety of award-winning TV shows, movies, anime, documentaries, and more on thousands of internet-connected devices.",
-    link: "https://netflix.com",
-  },
-  {
-    title: "Google",
-    description:
-      "A multinational technology company that specializes in Internet-related services and products.",
-    link: "https://google.com",
-  },
-  {
-    title: "Meta",
-    description:
-      "A technology company that focuses on building products that advance Facebook's mission of bringing the world closer together.",
-    link: "https://meta.com",
-  },
-  {
-    title: "Amazon",
-    description:
-      "A multinational technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence.",
-    link: "https://amazon.com",
-  },
-  {
-    title: "Microsoft",
-    description:
-      "A multinational technology company that develops, manufactures, licenses, supports, and sells computer software, consumer electronics, personal computers, and related services.",
-    link: "https://microsoft.com",
-  },
-];
+import Confetti from "react-confetti";
 
 const Categories = ({ isVoted }) => {
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const urlToken = queryParams.get("token");
 
   const [validateStatus, setValidateStatus] = useState(false);
   const [error, setError] = useState("");
   const [category, setCategory] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [urlToken, setToken] = useState(null);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const tokenValue = queryParams.get('token');
+    setToken(tokenValue);
+  }, [location.search]);
+
   useEffect(() => {
     const token = urlToken || Cookies.get("voteToken");
 
     if (!token) {
-      window.location.href = "http://localhost:3000/";
+      window.location.href = "";
     } else {
       if (urlToken) {
         Cookies.set("voteToken", urlToken, { expires: 3 });
@@ -123,14 +91,29 @@ const Categories = ({ isVoted }) => {
           {category.length !== 0 ? (
             <HoverEffect items={category} />
           ) : (
-            <div className="doneVoting text-center">
-              <p className="font-extrabold text-3xl">
-                You've voted for all the categories
-              </p>
-              <div className="duck">
-                <img src={duck} alt="duck" />
+            <>
+              <Confetti
+                drawShape={(ctx) => {
+                  ctx.beginPath();
+                  for (let i = 0; i < 22; i++) {
+                    const angle = 0.35 * i;
+                    const x = (0.2 + 1.5 * angle) * Math.cos(angle);
+                    const y = (0.2 + 1.5 * angle) * Math.sin(angle);
+                    ctx.lineTo(x, y);
+                  }
+                  ctx.stroke();
+                  ctx.closePath();
+                }}
+              />
+              <div className="doneVoting text-center">
+                <p className="font-extrabold text-3xl">
+                  You've voted for all the categories
+                </p>
+                <div className="duck">
+                  <img src={duck} alt="duck" />
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       ) : (
