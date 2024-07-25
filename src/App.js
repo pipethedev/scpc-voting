@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./styles/styles.css";
-import Cookies from "js-cookie";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Register from "./components/Registration/Register";
+import ProtectedRegister from "./ProtectedRegister";
 import Categories from "./components/Categories/Categories";
 import VoteNominees from "./components/Categories/VoteNominees";
 import ErrorMessage from "./components/ErrorMessage";
@@ -27,25 +26,6 @@ const App = () => {
       </Routes>
     </Router>
   );
-};
-
-const ProtectedRegister = () => {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = Cookies.get("voteToken");
-    if (token) {
-      window.location.href = "/vote";
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  if (loading) {
-    return null;
-  }
-
-  return <Register />;
 };
 
 export default App;

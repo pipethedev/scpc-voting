@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Category from "./Category";
 import { validateStudent } from "../../http/requests";
 import ErrorMessage from "../ErrorMessage";
@@ -10,6 +10,7 @@ import Confetti from "react-confetti";
 
 const Categories = ({ isVoted }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [validateStatus, setValidateStatus] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +29,7 @@ const Categories = ({ isVoted }) => {
     const token = urlToken || Cookies.get("voteToken");
 
     if (!token) {
-      window.location.href = "";
+      navigate("/");
     } else {
       if (urlToken) {
         Cookies.set("voteToken", urlToken, { expires: 3 });
@@ -42,6 +43,7 @@ const Categories = ({ isVoted }) => {
           setError(response.responseData.error);
           setValidateStatus(false);
           setLoading(false);
+          navigate("/");
         } else {
           setValidateStatus(true);
         }
@@ -49,10 +51,11 @@ const Categories = ({ isVoted }) => {
         setValidateStatus(false);
         setLoading(false);
         setError(error.message || "An error occurred");
+        navigate("/");
       }
     };
 
-    const getCategories = async () => {
+    const getCategories = async (token) => {
       try {
         const response = await validateStudent(token);
         setCategory(response.responseData.user.categories);
@@ -68,8 +71,9 @@ const Categories = ({ isVoted }) => {
     } else {
       setLoading(false);
       setError("No token found");
+      navigate("/login");
     }
-  }, [urlToken]);
+  }, [urlToken, navigate]);
 
   const renderCategories = category.map((value) => (
     <Category key={value.id} data={value} isVoted={isVoted} />
