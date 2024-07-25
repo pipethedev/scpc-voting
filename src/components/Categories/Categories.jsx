@@ -9,7 +9,6 @@ import { HoverEffect } from "../Card";
 import Confetti from "react-confetti";
 
 const Categories = ({ isVoted }) => {
-  const location = useLocation();
   const navigate = useNavigate();
 
   const [validateStatus, setValidateStatus] = useState(false);
@@ -17,13 +16,14 @@ const Categories = ({ isVoted }) => {
   const [category, setCategory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [urlToken, setToken] = useState(null);
 
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const tokenValue = queryParams.get('token');
-    setToken(tokenValue);
-  }, [location.search]);
+  const getTokenFromUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    return token;
+  };
+
+  const urlToken = getTokenFromUrl();
 
   useEffect(() => {
     const token = urlToken || Cookies.get("voteToken");
@@ -32,7 +32,7 @@ const Categories = ({ isVoted }) => {
       navigate("/");
     } else {
       if (urlToken) {
-        Cookies.set("voteToken", urlToken, { expires: 3 });
+        Cookies.set("voteToken", token, { expires: 3 });
       }
     }
 
