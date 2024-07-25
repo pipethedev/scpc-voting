@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import ErrorMessage from "../ErrorMessage";
 import nomineePic from "../../assets/nominee.png";
 import { nomineeRequest, validateStudent, vote } from "../../http/requests";
-import { CircularProgress, useToast } from "@chakra-ui/react";
+import { background, CircularProgress } from "@chakra-ui/react";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 const VoteNominees = ({ doneVoting }) => {
   const { id: urlId } = useParams();
-  const toast = useToast();
   const [nomineeData, setNomineeData] = useState([]);
   const [categoryId, setCategoryId] = useState();
   const [nomineeId, setNomineeId] = useState("");
@@ -19,15 +19,6 @@ const VoteNominees = ({ doneVoting }) => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  const showToast = (description, status = "success") => {
-    toast({
-      description,
-      status,
-      duration: 9000,
-      isClosable: true,
-    });
-  };
 
   useEffect(() => {
     const token = Cookies.get("voteToken");
@@ -61,7 +52,7 @@ const VoteNominees = ({ doneVoting }) => {
         }
       } catch (error) {
         setLoading(false);
-        setError(error.message || "An error occurred");
+        //toast.error(error.message || "An error occurred");
       }
     };
     getNomineesData();
@@ -69,22 +60,21 @@ const VoteNominees = ({ doneVoting }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if (!nomineeId) {
-      console.log("No nominee selected");
-      showToast("No nominees selected", "error");
+      toast.error("No nominees selected");
       return;
     }
 
     const token = Cookies.get("voteToken");
     if (!token) {
-      showToast("No token found", "error");
+      toast.error("Voter is not authenticated");
       return;
     }
 
     try {
       const handleVoting = async () => {
         const response = await validateStudent(token);
-        console.log(`voterId2:`, response);
 
         const votingData = {
           VoterId: response.responseData.user.userId,
@@ -94,16 +84,17 @@ const VoteNominees = ({ doneVoting }) => {
 
         const voteResponse = await vote(votingData, token);
         if (voteResponse.responseData.error) {
-          showToast(voteResponse.responseData.error, "error");
+          toast.error(voteResponse.responseData.error || "An error occurred while voting");
         } else {
-          showToast(voteResponse.responseData.message);
+          setLoading(false);
+          toast.success(voteResponse.responseData.message, { duration: 3000 });
           navigate(-1);
         }
       };
       await handleVoting();
     } catch (error) {
-      console.log(error);
-      showToast(error.message || "An error occurred", "error");
+      setLoading(false);
+      toast.error(error.message || "An error occurred", "error");
     }
   };
 
@@ -127,7 +118,15 @@ const VoteNominees = ({ doneVoting }) => {
         transition={{ duration: 0.6 }}
       >
         <div className="nom-img">
-          <img src={value.pictureUrl || nomineePic} alt={`nominee ${index}`} />
+          <div
+          className="w-80 h-96"
+        style={{
+          backgroundImage: `url(${value.pictureUrl || nomineePic})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+        }}
+      ></div>
         </div>
         <div>
           <p>
@@ -158,8 +157,8 @@ const VoteNominees = ({ doneVoting }) => {
         </div>
       ) : (
         <div>
-          <div className="cat-header">
-            <p>VOTING</p>
+          <div className="cat-header cursor-pointer">
+            <Link to='/vote'>VOTING</Link>
             <span>{categoryName}</span>
           </div>
           <div className="renderNominees">{renderNominees}</div>
@@ -167,15 +166,16 @@ const VoteNominees = ({ doneVoting }) => {
             <button
               type="button"
               onClick={handleSubmit}
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 p-8"
+              disabled={loading}
+              class="text-white text-xl bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 p-8"
             >
-              Vote
+              {loading ? 'Voting...' : 'Vote'}
             </button>
 
             <button
               type="button"
               onClick={() => setNomineeId("")}
-              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-xl px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
             >
               Reset
             </button>
