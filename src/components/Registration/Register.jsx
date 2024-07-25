@@ -77,7 +77,7 @@ const Register = () => {
         <Redirect message={data} />
       ) : (
         <center>
-          <p className="text-2xl mt-12 hidden md:block font-extrabold">
+          <p className="text-2xl mt-8 hidden md:block font-extrabold">
             Final year dinner
           </p>
           <div
