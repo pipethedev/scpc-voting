@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./styles/styles.css";
+import Cookies from "js-cookie";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Register from "./components/Registration/Register";
 import Categories from "./components/Categories/Categories";
@@ -12,10 +13,11 @@ const App = () => {
   const doneVoting = () => {
     setIsVoted(true);
   };
+
   return (
     <Router>
       <Routes>
-        <Route path="" element={<Register />} />
+        <Route path="" element={<ProtectedRegister />} />
         <Route path="vote/:token?" element={<Categories isVoted={isVoted} />} />
         <Route
           path="vote/nominees/:id"
@@ -25,6 +27,17 @@ const App = () => {
       </Routes>
     </Router>
   );
+};
+
+const ProtectedRegister = () => {
+  useEffect(() => {
+    const token = Cookies.get("voteToken");
+    if (token) {
+      window.location.href = "/vote";
+    }
+  }, []);
+
+  return <Register />;
 };
 
 export default App;

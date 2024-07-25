@@ -5,6 +5,7 @@ import nomineePic from "../../assets/nominee.png";
 import { nomineeRequest, validateStudent, vote } from "../../http/requests";
 import { CircularProgress, useToast } from "@chakra-ui/react";
 import Cookies from "js-cookie";
+import { motion } from "framer-motion";
 
 const VoteNominees = ({ doneVoting }) => {
   const { id: urlId } = useParams();
@@ -116,10 +117,15 @@ const VoteNominees = ({ doneVoting }) => {
         setNomineeId(value.id);
       }
     };
-    console.log(`nomineeId: ${nomineeId}`);
 
     return (
-      <div className="nominee-inside" key={value.id}>
+      <motion.div
+        className="nominee-inside"
+        key={value.id}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="nom-img">
           <img src={value.pictureUrl || nomineePic} alt={`nominee ${index}`} />
         </div>
@@ -130,7 +136,7 @@ const VoteNominees = ({ doneVoting }) => {
         </div>
         <div>
           <input
-            className="vote-input"
+            className="vote-input cursor-pointer"
             value={value.id}
             type="radio"
             onChange={handleRadioChange}
@@ -138,7 +144,7 @@ const VoteNominees = ({ doneVoting }) => {
             required
           />
         </div>
-      </div>
+      </motion.div>
     );
   });
 
@@ -158,10 +164,19 @@ const VoteNominees = ({ doneVoting }) => {
           </div>
           <div className="renderNominees">{renderNominees}</div>
           <div className="btns">
-            <button className="vote-btn" onClick={handleSubmit}>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 p-8"
+            >
               Vote
             </button>
-            <button className="reset-btn" onClick={() => setNomineeId("")}>
+
+            <button
+              type="button"
+              onClick={() => setNomineeId("")}
+              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+            >
               Reset
             </button>
           </div>
