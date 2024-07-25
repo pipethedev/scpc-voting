@@ -4,13 +4,12 @@ import ErrorMessage from "../ErrorMessage";
 import nomineePic from "../../assets/nominee.png";
 import { nomineeRequest, validateStudent, vote } from "../../http/requests";
 import { CircularProgress, useToast } from "@chakra-ui/react";
-// import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
 const VoteNominees = ({ doneVoting }) => {
-  const id = useParams();
+  const { id: urlId } = useParams();
   const toast = useToast();
   const [nomineeData, setNomineeData] = useState([]);
-  // const [voterId, setVoterId] = useState();
   const [categoryId, setCategoryId] = useState();
   const [nomineeId, setNomineeId] = useState("");
   const [nomineeStatus, setNomineeStatus] = useState(false);
@@ -20,80 +19,90 @@ const VoteNominees = ({ doneVoting }) => {
 
   const navigate = useNavigate();
 
-  const showToast = () => {
+  const showToast = (description, status = "success") => {
     toast({
-      description: "description",
-      status: "success",
+      description,
+      status,
       duration: 9000,
       isClosable: true,
     });
   };
+
   useEffect(() => {
-    showToast();
+    const token = Cookies.get("voteToken");
+
+    if (!token) {
+      setError("No token found");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const getNomineesData = async () => {
       try {
-        const response = await nomineeRequest(id.id);
-        setNomineeData(response.responseData.rows);
+        const response = await nomineeRequest(urlId);
+        console.log("RESP", response.responseData);
+        setNomineeData(response?.responseData?.nominees?.rows);
 
-        // Update categoryName and categoryId directly from the response
-        if (response.responseData.count > 0) {
+        if (response?.responseData?.nominees?.count > 0) {
           setLoading(false);
           setCategoryName(response.responseData.rows[0].Category.category);
           setCategoryId(response.responseData.rows[0].CategoryId);
           console.log(
-            `categoryName: ${response.responseData.rows[0].Category.category}`
+            `categoryName: ${response.responseData.rows[0].Category.category}`,
           );
           console.log(
-            `categoryId: ${response.responseData.rows[0].CategoryId}`
+            `categoryId: ${response.responseData.rows[0].CategoryId}`,
           );
         } else {
           setNomineeStatus(true);
           setError("Invalid Nominee");
         }
       } catch (error) {
-        // Handle error if necessary
+        setLoading(false);
+        setError(error.message || "An error occurred");
       }
     };
     getNomineesData();
-  }, []);
+  }, [urlId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nomineeId) {
       console.log("No nominee selected");
-      showToast();
-      alert("No nominees selected");
+      showToast("No nominees selected", "error");
+      return;
+    }
+
+    const token = Cookies.get("voteToken");
+    if (!token) {
+      showToast("No token found", "error");
       return;
     }
 
     try {
       const handleVoting = async () => {
-        const response = await validateStudent(id.token);
-        console.log(`voterId2: ${response.responseData.userId}`);
+        const response = await validateStudent(token);
+        console.log(`voterId2:`, response);
 
         const votingData = {
-          VoterId: response.responseData.userId,
+          VoterId: response.responseData.user.userId,
           NomineeId: nomineeId,
-          CategoryId: categoryId,
+          CategoryId: urlId,
         };
-        console.log(votingData);
 
-        const voteResponse = await vote(votingData);
+        const voteResponse = await vote(votingData, token);
         if (voteResponse.responseData.error) {
-          showToast();
-          alert(voteResponse.responseData.error);
+          showToast(voteResponse.responseData.error, "error");
         } else {
-          showToast();
-          alert(voteResponse.responseData.message);
+          showToast(voteResponse.responseData.message);
           navigate(-1);
         }
       };
       await handleVoting();
     } catch (error) {
       console.log(error);
-      showToast();
-      alert(error);
+      showToast(error.message || "An error occurred", "error");
     }
   };
 
@@ -112,7 +121,7 @@ const VoteNominees = ({ doneVoting }) => {
     return (
       <div className="nominee-inside" key={value.id}>
         <div className="nom-img">
-          <img src={nomineePic} alt={`nominee ${index}`} />
+          <img src={value.pictureUrl || nomineePic} alt={`nominee ${index}`} />
         </div>
         <div>
           <p>

@@ -7,7 +7,8 @@ const Category = ({ data, isVoted }) => {
   }
   return (
     <Link
-      to={isVoted ? "" : `${data.id}`}
+      // to={isVoted ? "" : `${data.id}`}
+      to={`/vote/nominees/${data.id}`}
       onClick={show}
       style={{
         width: "80%",

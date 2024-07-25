@@ -1,90 +1,77 @@
-// import React from "react";
+import axios from "axios";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_USERNAME = process.env.REACT_APP_API_USERNAME;
+const API_PASSWORD = process.env.REACT_APP_API_PASSWORD;
+
+const encodeCredentials = (username, password) => {
+  return btoa(`${username}:${password}`);
+};
+
+const httpClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Basic ${encodeCredentials(API_USERNAME, API_PASSWORD)}`,
+  },
+});
 
 export const registrationRequest = async (data) => {
   try {
-    const response = await fetch("https://scpc-voting-api.onrender.com/api/v1/user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await httpClient.post("/user", data);
+    const responseData = response.data;
 
-    const responseData = await response.json();
+    console.log("responseData", responseData);
     console.log(`message: ${responseData.message}`);
     console.log(`Error: ${responseData.error}`);
 
     return { response, responseData };
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
-
-//   `https://scpc-voting-api.onrender.com/api/v1/user/validate/${token}`,
 
 export const categoryRequest = async () => {
   try {
-    const response = await fetch(
-      `https://scpc-voting-api.onrender.com/api/v1/election/categories`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    const responseData = await response.json();
-
-    return responseData;
-  } catch (error) {}
+    const response = await httpClient.get("/election/categories");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 export const validateStudent = async (token) => {
-  const apiUrl = `https://scpc-voting-api.onrender.com/api/v1/user/validate/${token}`;
   try {
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const responseData = await response.json();
-    // console.log(responseData);
-
-    return { response, responseData };
-  } catch (error) {}
+    const response = await httpClient.get(`/user/validate/${token}`);
+    return { response, responseData: response.data };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 export const nomineeRequest = async (nomineeId) => {
-  const apiUrl = `https://scpc-voting-api.onrender.com/api/v1/election/category/nominees/${nomineeId}`;
   try {
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const responseData = await response.json();
-    // console.log(responseData.rows);
-    return { response, responseData };
-  } catch (error) {}
+    const response = await httpClient.get(
+      `/election/category/nominees/${nomineeId}`,
+    );
+    return { response, responseData: response.data };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
-export const vote = async (votingData) => {
-  const apiUrl = `https://scpc-voting-api.onrender.com/api/v1/election/vote`;
+export const vote = async (votingData, token) => {
   try {
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(votingData),
+    const response = await httpClient.post("/election/vote", votingData, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    const responseData = await response.json();
-    // console.log(responseData);
-    return { response, responseData };
+    return { response, responseData: response.data };
   } catch (error) {
-    return error;
+    console.error(error);
+    throw error;
   }
 };

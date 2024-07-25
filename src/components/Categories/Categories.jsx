@@ -1,57 +1,71 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Category from "./Category";
 import { validateStudent } from "../../http/requests";
 import ErrorMessage from "../ErrorMessage";
 import duck from "../../assets/duck.gif";
+import Cookies from "js-cookie";
 
 const Categories = ({ isVoted }) => {
-  const token = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const urlToken = queryParams.get("token");
+
   const [validateStatus, setValidateStatus] = useState(false);
   const [error, setError] = useState("");
-  // const [voterId, setVoterId] = useState();
   const [category, setCategory] = useState([]);
   const [loading, setLoading] = useState(true);
-  // const [isCategory, setIsCategory] = useState(false);
 
   useEffect(() => {
+    const token = urlToken || Cookies.get("voteToken");
+
+    if (!token) {
+      window.location.href = "http://localhost:3000/";
+    } else {
+      if (urlToken) {
+        Cookies.set("voteToken", urlToken, { expires: 3 });
+      }
+    }
+
     const validation = async (token) => {
       try {
-        const response = await validateStudent(token.token);
+        const response = await validateStudent(token);
         if (response.response.status !== 200) {
           setError(response.responseData.error);
           setValidateStatus(false);
           setLoading(false);
         } else {
           setValidateStatus(true);
-          // setVoterId(response.responseData.userId);
         }
       } catch (error) {
         setValidateStatus(false);
         setLoading(false);
-        setError(error);
+        setError(error.message || "An error occurred");
       }
     };
-    validation(token);
 
     const getCategories = async () => {
       try {
-        const response = await validateStudent(token.token);
-        setCategory(response.responseData.categories);
-        console.log(category);
-        console.log(category.length);
+        const response = await validateStudent(token);
+        setCategory(response.responseData.user.categories);
         setLoading(false);
       } catch (error) {
         setLoading(false);
       }
     };
 
-    getCategories(token);
-  }, [token]);
+    if (token) {
+      validation(token);
+      getCategories(token);
+    } else {
+      setLoading(false);
+      setError("No token found");
+    }
+  }, [urlToken]);
 
-  const renderCategories = category.map((value) => {
-    return <Category data={value} isVoted={isVoted} />;
-  });
+  const renderCategories = category.map((value) => (
+    <Category key={value.id} data={value} isVoted={isVoted} />
+  ));
 
   return (
     <div>

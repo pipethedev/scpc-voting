@@ -16,9 +16,9 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="" element={<Register />} />
-        <Route path="vote/:token" element={<Categories isVoted={isVoted} />} />
+        <Route path="vote/:token?" element={<Categories isVoted={isVoted} />} />
         <Route
-          path="vote/:token/:id"
+          path="vote/nominees/:id"
           element={<VoteNominees doneVoting={() => doneVoting()} />}
         />
         <Route path="*" element={<ErrorMessage message={"Page not found"} />} />
